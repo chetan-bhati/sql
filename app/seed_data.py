@@ -42,45 +42,43 @@ def seed_database():
         db.add(product)
     db.commit()
 
-    print("Seeding Orders, Payments, and OrderItems...")
+    print("Seeding Orders, Payments, and OrderItems in batches...")
     statuses = ["completed", "pending", "cancelled"]
     payment_methods = ["credit_card", "paypal", "cash"]
     payment_statuses = ["success", "failed", "pending"]
 
-    for _ in range(1000):
+    for i in range(1000):
         user = random.choice(users)
         order = Order(
             user_id=user.id,
-            amount=0,  # Will calculate
+            amount=0,
             status=random.choice(statuses)
         )
-        db.add(order)
-        db.flush() # get inserted order id
-
-        # Add 1 to 5 random items
+        
+        # Add 1 to 5 random items using relationship
         total_amount = 0
+        order_items = []
         for _ in range(random.randint(1, 5)):
             product = random.choice(products)
             quantity = random.randint(1, 4)
             total_amount += product.price * quantity
-            item = OrderItem(
-                order_id=order.id,
-                product_id=product.id,
-                quantity=quantity
-            )
-            db.add(item)
+            order_items.append(OrderItem(product=product, quantity=quantity))
             
+        order.items = order_items
         order.amount = total_amount
 
-        # Add Payment
-        payment = Payment(
-            order_id=order.id,
+        # Add Payment using relationship
+        order.payment = Payment(
             payment_method=random.choice(payment_methods),
             payment_status=random.choice(payment_statuses)
         )
-        db.add(payment)
-
-    db.commit()
+        
+        db.add(order)
+        
+        # Periodic commit every 200 orders to keep memory safe but speed high
+        if (i + 1) % 200 == 0:
+            db.commit()
+            print(f"Committed {i + 1} orders...")
     db.close()
     print("Database seeding completed successfully.")
 
