@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Practice UI Upgraded</title>
+    <!-- Use Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #eef2f5;
+            margin: 0;
+            color: #2c3e50;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .level-link {
+            display: block;
+            padding: 10px;
+            color: #bdc3c7;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .level-link:hover,
+        .level-link.active {
+            background: #34495e;
+            color: #fff;
+        }
+
+        .main {
+            flex: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+            background: #fdfdfd;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2980b9;
+        }
+
+        .section {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .lesson-content code {
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .example-card {
+            background: #f8f9fa;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .example-card pre {
+            margin: 0;
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .question-card {
+            border: 1px solid #dcdde1;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #fff;
+            border-top: 4px solid #3498db;
+        }
+
+        .question-card.guided {
+            border-top-color: #2ecc71;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            margin-top: 10px;
+            padding: 10px;
+            font-family: "Courier New", Courier, monospace;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button.hint-btn {
+            background: #f1c40f;
+            color: #333;
+        }
+
+        button.solution-btn {
+            background: #95a5a6;
+        }
+
+        .result-panel {
+            margin-top: 15px;
+            display: none;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .result-panel.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-panel.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stats {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .stats span {
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ecf0f1;
+            position: sticky;
+            top: 0;
+        }
+
+        .table-wrap {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #eee;
+        }
+
+        .hint-text,
+        .solution-text {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .hint-text {
+            background: #fcf3cf;
+            border-left: 3px solid #f1c40f;
+            color: #7d6608;
+        }
+
+        .solution-text {
+            background: #ebedef;
+            border-left: 3px solid #7f8c8d;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        /* Explorer Styles */
+        .explorer-table {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .explorer-table:hover {
+            background: #34495e;
+        }
+
+        .explorer-columns {
+            display: none;
+            padding-left: 20px;
+            font-size: 12px;
+            color: #bdc3c7;
+            margin-bottom: 10px;
+        }
+
+        .explorer-col {
+            padding: 2px 0;
+        }
+
+        .view-data-link {
+            font-size: 10px;
+            color: #3498db;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .view-data-link:hover {
+            color: #2980b9;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Table Data</h2>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>Levels</h2>
+        <div id="level-list">Loading...</div>
+
+        <h2 style="margin-top: 30px; border-top: 1px solid #34495e; padding-top: 10px;">Database Schema</h2>
+        <div id="explorer-container">Loading schema...</div>
+    </div>
+
+    <div class="main" id="main-content">
+        <h1>Welcome to SQL Learning!</h1>
+        <p>Select a level from the sidebar to begin.</p>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000/api";
+        let currentQuestions = [];
+
+        async function fetchLevels() {
+            try {
+                const res = await fetch(`${API_URL}/levels`);
+                const data = await res.json();
+                const list = document.getElementById("level-list");
+                list.innerHTML = "";
+                data.levels.forEach(l => {
+                    const a = document.createElement("a");
+                    a.className = "level-link";
+                    a.innerText = `Level ${l.level}: ${l.title}`;
+                    a.onclick = () => loadLevel(l.level);
+                    list.appendChild(a);
+                });
+            } catch (e) {
+                console.error("Failed to load levels", e);
+            }
+        }
+
+        async function loadLevel(levelId) {
+            document.querySelectorAll('.level-link').forEach(el => el.classList.remove('active'));
+            // Highlighting logic can be improved based on matching innerText, skipping for simplicity
+
+            const main = document.getElementById("main-content");
+            main.innerHTML = "<h1>Loading Level...</h1>";
+
+            try {
+                // Fetch Lesson
+                let res = await fetch(`${API_URL}/lesson/${levelId}`);
+                const lessonData = await res.json();
+
+                // Fetch Examples
+                res = await fetch(`${API_URL}/examples/${levelId}`);
+                const examplesData = await res.json();
+
+                // Fetch Questions
+                res = await fetch(`${API_URL}/questions/${levelId}`);
+                const questionsData = await res.json();
+                currentQuestions = questionsData.questions;
+
+                renderLevel(lessonData, examplesData.examples, currentQuestions);
+            } catch (e) {
+                main.innerHTML = "<h1>Error loading content</h1><p>" + e.message + "</p>";
+            }
+        }
+
+        function renderLevel(lesson, examples, questions) {
+            const main = document.getElementById("main-content");
+
+            // 1. LESSON
+            let html = `
+            <div class="section">
+                <h1>📘 ${lesson.title}</h1>
+                <div class="lesson-content">${marked.parse(lesson.content)}</div>
+            </div>
+        `;
+
+            // 2. EXAMPLES
+            if (examples.length > 0) {
+                html += `<div class="section"><h2>👀 Live Examples</h2>`;
+                examples.forEach((ex, idx) => {
+                    const eid = `ex-${idx}`;
+                    html += `
+                    <div class="example-card">
+                        <p><strong>Example:</strong> ${ex.explanation}</p>
+                        <pre><code>${ex.query}</code></pre>
+                        <button onclick="runExample('${eid}', \`${ex.query.replace(/`/g, '\\`')}\`)">Run Example</button>
+                        <div id="${eid}-res" class="result-panel"></div>
+                    </div>
+                `;
+                });
+                html += `</div>`;
+            }
+
+            // 3. SECREGATE QUESTIONS
+            const guided = questions.filter(q => q.question_type === 'guided');
+            const challenges = questions.filter(q => q.question_type === 'challenge');
+
+            // GUIDED PRACTICE
+            if (guided.length > 0) {
+                html += `<div class="section"><h2>✍️ Guided Practice</h2>`;
+                guided.forEach((q, idx) => html += createQuestionHTML(q, idx, true));
+                html += `</div>`;
+            }
+
+            // CHALLENGES
+            if (challenges.length > 0) {
+                html += `<div class="section"><h2>🧪 Challenges</h2>`;
+                challenges.forEach((q, idx) => html += createQuestionHTML(q, idx, false));
+                html += `</div>`;
+            }
+
+            main.innerHTML = html;
+        }
+
+        function createQuestionHTML(q, index, isGuided) {
+            const qid = q.id;
+            return `
+            <div class="question-card ${isGuided ? 'guided' : ''}">
+                <h3>${isGuided ? 'Task' : 'Question'} ${index + 1}</h3>
+                <p>${q.question_text}</p>
+                <textarea id="q-${qid}-input" placeholder="Write your SQL here..."></textarea>
+                
+                <div style="display:flex;">
+                    <button onclick="submitQuery(${qid})">▶ Run Query</button>
+                    ${q.hint ? `<button class="hint-btn" onclick="toggleHint(${qid})">💡 Hint</button>` : ''}
+                    <button class="solution-btn" onclick="showSolution(${qid})">👁 Show Solution</button>
+                </div>
+                
+                <div id="q-${qid}-hint" class="hint-text"><strong>Hint:</strong> ${q.hint || ''}</div>
+                <div id="q-${qid}-solution" class="solution-text"></div>
+                
+                <div id="q-${qid}-res" class="result-panel"></div>
+            </div>
+        `;
+        }
+
+        function toggleHint(qid) {
+            const h = document.getElementById(`q-${qid}-hint`);
+            h.style.display = h.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function showSolution(qid) {
+            const s = document.getElementById(`q-${qid}-solution`);
+            if (s.style.display === 'block') {
+                s.style.display = 'none';
+                return;
+            }
+
+            s.innerHTML = "Loading...";
+            s.style.display = 'block';
+            try {
+                const res = await fetch(`${API_URL}/solution/${qid}`);
+                const data = await res.json();
+                s.innerHTML = `<strong>Solution:</strong>\n${data.solution}`;
+            } catch (e) {
+                s.innerHTML = "Failed to load solution.";
+            }
+        }
+
+        async function runExample(eid, query) {
+            const panel = document.getElementById(`${eid}-res`);
+            panel.style.display = 'block';
+            panel.className = 'result-panel';
+            panel.innerHTML = "Executing...";
+
+            // To run example safely we can just use our validation endpoint by mocking or passing same query
+            try {
+                // Quick hack: just use an existing question but pass the example query. 
+                // We can also create a raw execute endpoint if we wanted, but submit-query works if we pass the first question ID.
+                const dummy_question_id = currentQuestions[0].id;
+                const res = await fetch(`${API_URL}/submit-query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question_id: dummy_question_id, query: query })
+                });
+                const data = await res.json();
+
+                // For examples, we only care about success, not if it matches expected
+                if (!data.success) {
+                    panel.className = 'result-panel error';
+                    panel.innerHTML = data.error;
+                } else {
+                    panel.className = 'result-panel correct';
+                    panel.innerHTML = renderTable(data.columns, data.rows);
+                }
+            } catch (e) {
+                panel.className = 'result-panel error';
+                panel.innerHTML = "Network Error.";
+            }
+        }
+
+        async function submitQuery(qid) {
+            const query = document.getElementById(`q-${qid}-input`).value.trim();
+            const resDiv = document.getElementById(`q-${qid}-res`);
+            if (!query) return;
+
+            resDiv.style.display = "block";
+            resDiv.className = "result-panel";
+            resDiv.innerHTML = "Executing locally...";
+
+            try {
+                const res = await fetch(`${API_URL}/submit-query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question_id: qid, query: query })
+                });
+                const data = await res.json();
+
+                let statsHtml = `<div class="stats">
+                <span>⏱ Execution time: ${data.execution_time_ms || 0}ms</span>
+                <span>🔄 Attempts: ${data.attempts || 1}</span>
+            </div>`;
+
+                if (!data.success) {
+                    resDiv.className = "result-panel error";
+                    resDiv.innerHTML = statsHtml + `<strong>Error:</strong> ${data.error}`;
+                    return;
+                }
+
+                if (data.is_correct) {
+                    resDiv.className = "result-panel correct";
+                    resDiv.innerHTML = statsHtml + `<strong>✅ Passed!</strong> ${data.message}`;
+                } else {
+                    resDiv.className = "result-panel error";
+                    resDiv.innerHTML = statsHtml + `<strong>❌ Failed.</strong> ${data.message}`;
+                }
+
+                if (data.columns && data.columns.length > 0) {
+                    resDiv.innerHTML += renderTable(data.columns, data.rows);
+                }
+
+            } catch (e) {
+                resDiv.className = "result-panel error";
+                resDiv.innerHTML = "Network Error connecting to engine.";
+            }
+        }
+
+        function renderTable(columns, rows) {
+            let table = "<div class='table-wrap'><table><thead><tr>";
+            columns.forEach(col => { table += `<th>${col}</th>`; });
+            table += "</tr></thead><tbody>";
+
+            let limit = Math.min(rows.length, 15);
+            for (let i = 0; i < limit; i++) {
+                table += "<tr>";
+                rows[i].forEach(val => { table += `<td>${val === null ? '<em>NULL</em>' : val}</td>`; });
+                table += "</tr>";
+            }
+            table += "</tbody></table></div>";
+            if (rows.length > 15) {
+                table += `<p style="font-size:12px;color:#888;">Showing 15 of ${rows.length} rows...</p>`;
+            }
+            return table;
+        }
+
+        fetchLevels();
+        fetchExplorerSchema();
+
+        async function fetchExplorerSchema() {
+            try {
+                const res = await fetch(`${API_URL}/explorer/schema`);
+                const data = await res.json();
+                renderExplorer(data.schema);
+            } catch (e) {
+                document.getElementById("explorer-container").innerText = "Error loading schema.";
+            }
+        }
+
+        function renderExplorer(schema) {
+            const container = document.getElementById("explorer-container");
+            container.innerHTML = "";
+
+            for (const table in schema) {
+                const tableDiv = document.createElement("div");
+                tableDiv.className = "explorer-table";
+                tableDiv.innerHTML = `
+                    <span onclick="toggleColumns('${table}')">📦 ${table}</span>
+                    <span class="view-data-link" onclick="previewTable('${table}')">Preview</span>
+                `;
+
+                const colsDiv = document.createElement("div");
+                colsDiv.id = `cols-${table}`;
+                colsDiv.className = "explorer-columns";
+                schema[table].forEach(col => {
+                    const colDiv = document.createElement("div");
+                    colDiv.className = "explorer-col";
+                    colDiv.innerText = `🔹 ${col.name} (${col.type})`;
+                    colsDiv.appendChild(colDiv);
+                });
+
+                container.appendChild(tableDiv);
+                container.appendChild(colsDiv);
+            }
+        }
+
+        function toggleColumns(table) {
+            const cols = document.getElementById(`cols-${table}`);
+            cols.style.display = cols.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function previewTable(table) {
+            const modal = document.getElementById("dataModal");
+            const title = document.getElementById("modalTitle");
+            const body = document.getElementById("modalBody");
+
+            title.innerText = `Data Preview: ${table}`;
+            body.innerHTML = "Fetching data...";
+            modal.style.display = "block";
+
+            try {
+                const res = await fetch(`${API_URL}/explorer/table/${table}`);
+                const data = await res.json();
+                body.innerHTML = renderTable(data.columns, data.rows);
+            } catch (e) {
+                body.innerHTML = "Error fetching data.";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("dataModal").style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById("dataModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
